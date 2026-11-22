@@ -250,13 +250,27 @@ export const ChannelScreen: React.FC<ChannelScreenProps> = ({
       )}
 
       {micError && (
-        <div className="px-4 py-2.5 bg-red-500/15 border-b border-red-500/30 flex items-center justify-between gap-3 text-xs text-red-300">
+        <div
+          onClick={async () => {
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              stream.getTracks().forEach((t) => t.stop());
+              resetMicError();
+            } catch (e) {
+              console.warn('Retry mic permission failed:', e);
+            }
+          }}
+          className="cursor-pointer px-4 py-2.5 bg-red-500/15 border-b border-red-500/30 flex items-center justify-between gap-3 text-xs text-red-300 hover:bg-red-500/25 transition-colors"
+        >
           <div className="flex items-center gap-2">
             <MicOff className="w-4 h-4 flex-shrink-0 text-red-400" />
             <span>{micError}</span>
           </div>
           <button
-            onClick={resetMicError}
+            onClick={(e) => {
+              e.stopPropagation();
+              resetMicError();
+            }}
             className="px-2.5 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-200 font-semibold rounded-lg"
           >
             Dismiss

@@ -3,8 +3,6 @@ package com.example.walkietalkie;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.webkit.PermissionRequest;
-import android.webkit.WebChromeClient;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
@@ -16,7 +14,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Ensure runtime audio recording permission is requested on startup
+        // Pre-prompt for microphone permissions on startup if not yet granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
@@ -24,16 +22,6 @@ public class MainActivity extends BridgeActivity {
                     new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.MODIFY_AUDIO_SETTINGS},
                     MIC_PERMISSION_REQUEST_CODE
             );
-        }
-
-        // Configure WebView WebChromeClient to grant WebRTC microphone requests
-        if (this.bridge != null && this.bridge.getWebView() != null) {
-            this.bridge.getWebView().setWebChromeClient(new WebChromeClient() {
-                @Override
-                public void onPermissionRequest(final PermissionRequest request) {
-                    request.grant(request.getResources());
-                }
-            });
         }
     }
 }
