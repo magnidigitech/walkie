@@ -22,6 +22,8 @@ services:
     command: --config /etc/livekit.yaml
     volumes:
       - ./deploy/livekit.yaml:/etc/livekit.yaml:ro
+    expose:
+      - 7880
     ports:
       - "7881:7881"                   # WebRTC TCP fallback
       - "7882:7882/udp"               # WebRTC primary ICE UDP
@@ -67,6 +69,8 @@ services:
       dockerfile: Dockerfile
     container_name: walkie_frontend
     restart: unless-stopped
+    expose:
+      - 80
     depends_on:
       api:
         condition: service_started
