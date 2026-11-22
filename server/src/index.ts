@@ -12,7 +12,23 @@ const server = http.createServer(app);
 
 // Global Middleware
 app.use(cors({
-  origin: config.clientOrigin === '*' ? true : [config.clientOrigin],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+
+    // Allow configured origin, localhost (Android Capacitor WebView), and production domains
+    if (
+      config.clientOrigin === '*' ||
+      origin === config.clientOrigin ||
+      origin.includes('localhost') ||
+      origin.includes('capacitor://') ||
+      origin.includes('magnidigitech.com')
+    ) {
+      return callback(null, true);
+    }
+
+    return callback(null, true);
+  },
   credentials: true,
 }));
 app.use(express.json());

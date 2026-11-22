@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { CurrentSpeaker } from '../types';
 
 export type RealtimeEventHandler = (data: any) => void;
@@ -24,9 +25,12 @@ class RealtimeService {
       return;
     }
 
-    const isCapacitor = typeof (window as any).Capacitor !== 'undefined' || window.location.protocol === 'capacitor:';
-    const protocol = isCapacitor ? 'wss:' : (window.location.protocol === 'https:' ? 'wss:' : 'ws:');
-    const host = isCapacitor ? 'talk.magnidigitech.com' : window.location.host;
+    const isNative = Capacitor.isNativePlatform();
+    const isLocalhostApp = typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port !== '5173';
+    const isMobileClient = isNative || isLocalhostApp || (typeof window !== 'undefined' && window.location.protocol === 'capacitor:');
+
+    const protocol = isMobileClient ? 'wss:' : (window.location.protocol === 'https:' ? 'wss:' : 'ws:');
+    const host = isMobileClient ? 'talk.magnidigitech.com' : window.location.host;
     const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(this.token)}`;
 
     this.emit('connection', { status: 'connecting' });

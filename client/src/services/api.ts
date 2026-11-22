@@ -1,7 +1,11 @@
+import { Capacitor } from '@capacitor/core';
 import { Channel, ChannelInvite, ChannelMember, User } from '../types';
 
-const isCapacitor = typeof (window as any).Capacitor !== 'undefined' || window.location.protocol === 'capacitor:';
-const API_BASE = isCapacitor ? 'https://talk.magnidigitech.com/api' : '/api';
+const isNative = Capacitor.isNativePlatform();
+const isLocalhostApp = typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port !== '5173';
+export const API_BASE = (isNative || isLocalhostApp || (typeof window !== 'undefined' && window.location.protocol === 'capacitor:'))
+  ? 'https://talk.magnidigitech.com/api'
+  : '/api';
 
 class ApiClient {
   private token: string | null = null;
