@@ -43,10 +43,10 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-walkie}:${POSTGRES_PASSWORD:-walkietalkie_secret}@postgres:5432/${POSTGRES_DB:-walkietalkie}
       JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_at_least_32_characters_long}
       LIVEKIT_URL: http://livekit:7880
-      LIVEKIT_PUBLIC_URL: https://${RTC_DOMAIN:-rtc.example.com}
+      LIVEKIT_PUBLIC_URL: https://${RTC_DOMAIN:-rtc.magnidigitech.com}
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-talk_api_key_walkie}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-secret_livekit_key_at_least_32_characters_long_prod}
-      CLIENT_ORIGIN: https://${APP_DOMAIN:-talk.example.com}
+      CLIENT_ORIGIN: https://${APP_DOMAIN:-talk.magnidigitech.com}
       TURN_MAX_DURATION_MS: ${TURN_MAX_DURATION_MS:-30000}
       TURN_HEARTBEAT_TIMEOUT_MS: ${TURN_HEARTBEAT_TIMEOUT_MS:-3500}
     command: sh -c "node dist/db/migrate.js && node dist/index.js"

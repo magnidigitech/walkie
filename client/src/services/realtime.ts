@@ -24,8 +24,9 @@ class RealtimeService {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
+    const isCapacitor = typeof (window as any).Capacitor !== 'undefined' || window.location.protocol === 'capacitor:';
+    const protocol = isCapacitor ? 'wss:' : (window.location.protocol === 'https:' ? 'wss:' : 'ws:');
+    const host = isCapacitor ? 'talk.magnidigitech.com' : window.location.host;
     const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(this.token)}`;
 
     this.emit('connection', { status: 'connecting' });

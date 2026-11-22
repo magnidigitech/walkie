@@ -9,8 +9,7 @@ rtc:
   port_range_start: 50000
   port_range_end: 60000
   use_external_ip: true
-  # In production, replace with your Hostinger VPS public IP if automatic detection is not desired:
-  # node_ip: "YOUR_VPS_PUBLIC_IP"
+  node_ip: "187.127.159.200"
 
 # API keys for server-to-server and token generation
 # These match LIVEKIT_API_KEY and LIVEKIT_API_SECRET in your .env
@@ -20,7 +19,7 @@ keys:
 # Built-in TURN server for clients behind strict firewalls and mobile carrier NATs
 turn:
   enabled: true
-  domain: "rtc.example.com"
+  domain: "rtc.magnidigitech.com"
   tls_port: 5349
   udp_port: 3478
   external_tls: true

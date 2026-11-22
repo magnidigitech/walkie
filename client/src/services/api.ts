@@ -1,6 +1,7 @@
 import { Channel, ChannelInvite, ChannelMember, User } from '../types';
 
-const API_BASE = '/api';
+const isCapacitor = typeof (window as any).Capacitor !== 'undefined' || window.location.protocol === 'capacitor:';
+const API_BASE = isCapacitor ? 'https://talk.magnidigitech.com/api' : '/api';
 
 class ApiClient {
   private token: string | null = null;
