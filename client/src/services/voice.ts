@@ -137,6 +137,29 @@ class VoiceService {
    * Only called when server arbiter has granted the turn.
    */
   public async startTransmitting(): Promise<{ success: boolean; error?: string }> {
+    // If room is still connecting, wait up to 3 seconds for it to become ready
+    if (this.room && (this.room.state === 'connecting' || this.room.state === 'reconnecting')) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => reject(new Error('Media server connection timed out')), 3000);
+          const check = () => {
+            if (this.room?.state === 'connected') {
+              clearTimeout(timeout);
+              resolve();
+            } else if (!this.room || this.room.state === 'disconnected') {
+              clearTimeout(timeout);
+              reject(new Error('Media server disconnected'));
+            } else {
+              setTimeout(check, 100);
+            }
+          };
+          check();
+        });
+      } catch (e: any) {
+        return { success: false, error: 'Voice server connecting... please wait a second' };
+      }
+    }
+
     if (!this.room || this.room.state !== 'connected') {
       console.warn('[Voice] Cannot transmit: media room not connected (state: ' + (this.room?.state || 'null') + ')');
       return { success: false, error: 'Connecting to voice media server... please wait' };

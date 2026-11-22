@@ -229,9 +229,9 @@ export class PttArbiter {
     at.addGrant({
       roomJoin: true,
       room: channelId,
-      canPublish: false, // strictly false for listeners
-      canSubscribe: true, // listeners can hear
-      canPublishData: false,
+      canPublish: true, // Authorized channel member can publish when granted by Arbiter
+      canSubscribe: true, // Listeners can hear
+      canPublishData: true,
     });
 
     return await at.toJwt();
