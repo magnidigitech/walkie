@@ -10,6 +10,9 @@ import { WalkieWsServer } from './realtime/wsServer.js';
 const app = express();
 const server = http.createServer(app);
 
+// Trust first proxy (Traefik / Coolify / Nginx) for correct rate limiting & client IP
+app.set('trust proxy', 1);
+
 // Global Middleware
 app.use(cors({
   origin: (origin, callback) => {

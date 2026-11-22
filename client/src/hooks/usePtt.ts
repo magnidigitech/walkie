@@ -115,15 +115,15 @@ export function usePtt({ channelId, currentUser }: UsePttOptions) {
 
       // If user is still holding the button
       if (isHoldingRef.current) {
-        const started = await voice.startTransmitting();
-        if (started) {
+        const result = await voice.startTransmitting();
+        if (result.success) {
           setPttState('TALKING');
           startHeartbeat();
         } else {
-          // Mic permission denied or capture failure
+          // Transmission failure (voice room not connected or mic permission denied)
           setIsHolding(false);
           setPttState('MIC_DENIED');
-          setMicError('Microphone permission denied. Tap to retry.');
+          setMicError(result.error || 'Voice error. Tap to retry.');
           await stopTalkingAndRelease();
         }
       } else {

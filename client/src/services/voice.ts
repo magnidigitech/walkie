@@ -136,10 +136,10 @@ class VoiceService {
    * Start transmitting voice: requests microphone access and publishes local audio track.
    * Only called when server arbiter has granted the turn.
    */
-  public async startTransmitting(): Promise<boolean> {
+  public async startTransmitting(): Promise<{ success: boolean; error?: string }> {
     if (!this.room || this.room.state !== 'connected') {
-      console.warn('[Voice] Cannot transmit: media room not connected');
-      return false;
+      console.warn('[Voice] Cannot transmit: media room not connected (state: ' + (this.room?.state || 'null') + ')');
+      return { success: false, error: 'Connecting to voice media server... please wait' };
     }
 
     try {
@@ -158,18 +158,22 @@ class VoiceService {
       await this.room.localParticipant.publishTrack(this.localAudioTrack);
       console.log('[Voice] Microphone track published (transmitting)');
       this.notifyState();
-      return true;
+      return { success: true };
     } catch (err: any) {
       console.error('[Voice] Failed to start transmitting:', err);
+      let errMsg = 'Microphone capture failed';
       if (
         err.name === 'NotAllowedError' ||
         err.name === 'PermissionDeniedError' ||
         err.message?.includes('Permission denied')
       ) {
         this.micDenied = true;
+        errMsg = 'Microphone permission denied. Tap to retry.';
+      } else if (err.message) {
+        errMsg = err.message;
       }
-      this.notifyState(err.message || 'Microphone access failed');
-      return false;
+      this.notifyState(errMsg);
+      return { success: false, error: errMsg };
     }
   }
 

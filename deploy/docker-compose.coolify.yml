@@ -31,8 +31,6 @@ services:
       - "50000-50050:50000-50050/udp" # WebRTC media transport range (optimized for Docker userland proxy)
       - "3478:3478/udp"               # TURN UDP
       - "3478:3478/tcp"               # TURN TCP
-    environment:
-      LIVEKIT_CONFIG: /etc/livekit.yaml
 
   api:
     build:
