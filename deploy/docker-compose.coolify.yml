@@ -25,6 +25,7 @@ services:
     expose:
       - 7880
     ports:
+      - "7880:7880"                   # Signaling HTTP/WS
       - "7881:7881"                   # WebRTC TCP fallback
       - "7882:7882/udp"               # WebRTC primary ICE UDP
       - "50000-50050:50000-50050/udp" # WebRTC media transport range (optimized for Docker userland proxy)
