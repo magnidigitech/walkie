@@ -1,0 +1,16 @@
+{
+  "name": "walkie-talkie",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production Push-to-Talk Walkie Talkie web, mobile, and server system",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "test": "npm --prefix server test && npm --prefix client test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

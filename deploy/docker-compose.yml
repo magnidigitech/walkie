@@ -1,0 +1,107 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: walkie_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-walkie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-walkietalkie_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-walkietalkie}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - walkie-private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-walkie} -d ${POSTGRES_DB:-walkietalkie}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  livekit:
+    image: livekit/livekit-server:v1.7.2
+    container_name: walkie_livekit
+    restart: unless-stopped
+    command: --config /etc/livekit.yaml
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "7880:7880"                # Signaling HTTP/WS
+      - "7881:7881"                # WebRTC TCP fallback
+      - "7882:7882/udp"            # WebRTC primary ICE UDP
+      - "50000-60000:50000-60000/udp" # WebRTC media transport range
+      - "3478:3478/udp"            # TURN UDP
+      - "3478:3478/tcp"            # TURN TCP
+    networks:
+      - walkie-private
+
+  api:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: walkie_api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-walkie}:${POSTGRES_PASSWORD:-walkietalkie_secret}@postgres:5432/${POSTGRES_DB:-walkietalkie}
+      JWT_SECRET: ${JWT_SECRET}
+      LIVEKIT_URL: http://livekit:7880
+      LIVEKIT_PUBLIC_URL: https://${RTC_DOMAIN:-rtc.example.com}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+      CLIENT_ORIGIN: https://${APP_DOMAIN:-talk.example.com}
+      TURN_MAX_DURATION_MS: ${TURN_MAX_DURATION_MS:-30000}
+      TURN_HEARTBEAT_TIMEOUT_MS: ${TURN_HEARTBEAT_TIMEOUT_MS:-3500}
+    command: sh -c "node dist/db/migrate.js && node dist/index.js"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      livekit:
+        condition: service_started
+    networks:
+      - walkie-private
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3001/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ../client
+      dockerfile: Dockerfile
+    container_name: walkie_frontend
+    restart: unless-stopped
+    networks:
+      - walkie-private
+
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: walkie_caddy
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-talk.example.com}
+      RTC_DOMAIN: ${RTC_DOMAIN:-rtc.example.com}
+    ports:
+      - "80:80"       # HTTP (ACME challenge & redirect)
+      - "443:443"     # HTTPS
+      - "443:443/udp" # HTTP/3 (QUIC)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - walkie-private
+    depends_on:
+      - frontend
+      - api
+      - livekit
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  walkie-private:
+    driver: bridge

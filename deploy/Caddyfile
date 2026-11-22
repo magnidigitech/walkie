@@ -1,0 +1,48 @@
+# Caddy reverse proxy with automated Let's Encrypt HTTPS
+# Replace example hostnames with your actual VPS domain names
+
+{$APP_DOMAIN:talk.example.com} {
+    # Forward API requests to the Node.js backend
+    handle /api/* {
+        reverse_proxy api:3001 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Forward WebSocket realtime signaling to backend
+    handle /ws* {
+        reverse_proxy api:3001 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Serve static PWA frontend
+    handle {
+        reverse_proxy frontend:80
+    }
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode zstd gzip
+}
+
+# LiveKit WebRTC Signaling Subdomain
+{$RTC_DOMAIN:rtc.example.com} {
+    reverse_proxy livekit:7880 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    encode zstd gzip
+}
