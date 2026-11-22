@@ -28,7 +28,7 @@ services:
       - "7880:7880"                # Signaling HTTP/WS
       - "7881:7881"                # WebRTC TCP fallback
       - "7882:7882/udp"            # WebRTC primary ICE UDP
-      - "50000-60000:50000-60000/udp" # WebRTC media transport range
+      - "50000-50050:50000-50050/udp" # WebRTC media transport range
       - "3478:3478/udp"            # TURN UDP
       - "3478:3478/tcp"            # TURN TCP
     networks:
