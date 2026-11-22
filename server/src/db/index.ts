@@ -1,6 +1,7 @@
 import pg from 'pg';
 import crypto from 'crypto';
 import { config } from '../config.js';
+import { SCHEMA_SQL } from './schema.js';
 
 const { Pool } = pg;
 
@@ -261,10 +262,11 @@ export async function initDb(): Promise<void> {
       connectionString: config.databaseUrl,
       connectionTimeoutMillis: 2000,
     });
-    // Test connectivity
+    // Test connectivity and ensure schema tables exist
     const client = await pool.connect();
+    await client.query(SCHEMA_SQL);
     client.release();
-    console.log('[DB] Connected to PostgreSQL successfully.');
+    console.log('[DB] Connected to PostgreSQL & verified schema tables.');
   } catch (err: any) {
     console.warn(`[DB] PostgreSQL not reachable (${err.message}). Using resilient in-memory database store.`);
     useFallback = true;
